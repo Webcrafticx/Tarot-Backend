@@ -21,7 +21,7 @@ app.get('/', (req,res)=>{
     res.status(200).json({
         success: true,
         message: "Tarot Api running successfully",
-        timestamp : Date.now().toISOString(),
+        timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         environment: process.env.NODE_ENV
     })
