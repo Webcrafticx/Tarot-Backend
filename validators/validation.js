@@ -21,15 +21,16 @@ const appointmentSchema = joi.object({
     .messages({
         'string.empty': 'Service type is required',
     }),
-    date: joi.date().iso().required()
+    selectedWindow: joi.string().valid('Mon-Wed', 'Thu-Fri', 'Sat-Sun').optional()
     .messages({
-        'date.format': 'Date must be in valid format',
+        'any.only': 'Selected window must be one of Mon-Wed, Thu-Fri, Sat-Sun', 
     }),
-    timeSlot: joi.string().trim().required()
+    duration: joi.number().integer().min(10).max(120).optional()
     .messages({
-        'string.empty': 'Time slot is required',
-    })
-
+        'number.base': 'Duration must be a number',
+        'number.min': 'Duration must be at least 10 minutes',
+        'number.max': 'Duration must be at most 120 minutes',
+    }), 
 })
 
 const loginSchema = joi.object({
