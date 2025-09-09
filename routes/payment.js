@@ -1,19 +1,23 @@
 const express = require('express');
-const { createDummyOrder, verifyDummyPayment, getDummyPaymentOptions } = require('../controllers/paymentController');
+const {
+  createPaymentOrder,
+  verifyPaymentAndCreateAppointment,
+  getAppointments
+} = require('../controllers/paymentController'); // ✅ import the right controllers
 const router = express.Router();
 
 /**
  * @swagger
  * tags:
  *   name: Payment
- *   description: Dummy payment and appointment confirmation
+ *   description: Payment and appointment booking
  */
 
 /**
  * @swagger
- * /payment/create-dummy-order:
+ * /payment/create-appointment:
  *   post:
- *     summary: Create a dummy payment order for an appointment
+ *     summary: Create a payment order for an appointment
  *     tags: [Payment]
  *     requestBody:
  *       required: true
@@ -22,18 +26,39 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - appointmentId
- *               - amount
+ *               - name
+ *               - email
+ *               - phone
+ *               - serviceType
+ *               - price
  *             properties:
- *               appointmentId:
+ *               name:
  *                 type: string
- *                 example: 64f4c8c2a1234567890abcd1
- *               amount:
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 example: john@example.com
+ *               phone:
+ *                 type: string
+ *                 example: 9876543210
+ *               serviceType:
+ *                 type: string
+ *                 example: Haircut
+ *               selectedWindow:
+ *                 type: string
+ *                 example: Mon-Wed
+ *               duration:
+ *                 type: number
+ *                 example: 30
+ *               price:
  *                 type: number
  *                 example: 500
+ *               location:
+ *                 type: string
+ *                 example: India
  *     responses:
  *       200:
- *         description: Dummy order created successfully
+ *         description: Payment order created
  *         content:
  *           application/json:
  *             schema:
@@ -41,42 +66,44 @@ const router = express.Router();
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
+ *                   example: Payment order created
  *                 data:
  *                   type: object
  *                   properties:
- *                     id:
- *                       type: string
- *                     entity:
- *                       type: string
- *                     amount:
- *                       type: number
- *                     amount_paid:
- *                       type: number
- *                     amount_due:
- *                       type: number
- *                     currency:
- *                       type: string
- *                     receipt:
- *                       type: string
- *                     status:
- *                       type: string
- *                     attempts:
- *                       type: number
- *                     created_at:
- *                       type: number
- *       404:
- *         description: Appointment not found
+ *                     order:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           example: order_1694123456789
+ *                         amount:
+ *                           type: number
+ *                           example: 50000
+ *                         currency:
+ *                           type: string
+ *                           example: INR
+ *                         receipt:
+ *                           type: string
+ *                           example: temp_1694123456789
+ *                         status:
+ *                           type: string
+ *                           example: created
+ *                     appointmentData:
+ *                       $ref: '#/components/schemas/AppointmentData'
+ *       400:
+ *         description: Selected slot is not available
  *       500:
  *         description: Server error
  */
 
 /**
  * @swagger
- * /payment/verify-dummy-payment:
+ * /payment/verify:
  *   post:
- *     summary: Verify a dummy payment and confirm the appointment
+ *     summary: Verify payment and create appointment
  *     tags: [Payment]
  *     requestBody:
  *       required: true
@@ -85,18 +112,21 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - appointmentId
+ *               - paymentId
  *               - orderId
+ *               - appointmentData
  *             properties:
- *               appointmentId:
+ *               paymentId:
  *                 type: string
- *                 example: 64f4c8c2a1234567890abcd1
+ *                 example: pay_dummy_1694123456789
  *               orderId:
  *                 type: string
- *                 example: order_dummy_1694123456789
+ *                 example: order_1694123456789
+ *               appointmentData:
+ *                 $ref: '#/components/schemas/AppointmentData'
  *     responses:
  *       200:
- *         description: Payment verified and appointment confirmed
+ *         description: Payment verified and appointment created
  *         content:
  *           application/json:
  *             schema:
@@ -104,73 +134,28 @@ const router = express.Router();
  *               properties:
  *                 success:
  *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
- *                 data:
- *                   type: object
- *                   properties:
- *                     appointment:
- *                       type: object
- *                     paymentId:
- *                       type: string
- *       404:
- *         description: Appointment not found
- *       500:
- *         description: Server error
- */
-
-/**
- * @swagger
- * /payment/dummy-options/{appointmentId}:
- *   get:
- *     summary: Get dummy payment options for a specific appointment
- *     tags: [Payment]
- *     parameters:
- *       - in: path
- *         name: appointmentId
- *         required: true
- *         schema:
- *           type: string
- *         description: Appointment ID
- *     responses:
- *       200:
- *         description: Dummy payment options fetched
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
+ *                   example: Payment verified, appointment created & confirmed
  *                 data:
  *                   type: object
  *                   properties:
  *                     appointmentId:
  *                       type: string
- *                     amount:
- *                       type: number
- *                     currency:
+ *                       example: 64f4c8c2a1234567890abcd1
+ *                     status:
  *                       type: string
- *                     name:
- *                       type: string
- *                     email:
- *                       type: string
- *                     description:
- *                       type: string
- *       404:
- *         description: Appointment not found
+ *                       example: confirmed
+ *       400:
+ *         description: Selected slot is no longer available
  *       500:
  *         description: Server error
  */
 
 
-// Create dummy order
-router.post('/create-dummy-order', createDummyOrder);
 
-// Verify dummy payment
-router.post('/verify-dummy-payment', verifyDummyPayment);
-
-// Get dummy payment options
-router.get('/dummy-options/:appointmentId', getDummyPaymentOptions);
+router.post('/create-appointment', createPaymentOrder);                  
+router.post('/verify', verifyPaymentAndCreateAppointment);         
 
 module.exports = router;

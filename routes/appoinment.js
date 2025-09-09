@@ -1,6 +1,6 @@
 const express = require('express');
 const { validateAppointment } = require('../validators/validation');
-const { createAppointment, getAppointments } = require('../controllers/appointmentController');
+const { getAppointments } = require('../controllers/appointmentController');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
@@ -11,65 +11,6 @@ const router = express.Router();
  *   description: Appointment management APIs
  */
 
-/**
- * @swagger
- * /appointment/create-appointment:
- *   post:
- *     summary: Create a new appointment
- *     tags: [Appointment]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - email
- *               - phone
- *               - serviceType
- *             properties:
- *               name:
- *                 type: string
- *                 example: John Doe
- *               email:
- *                 type: string
- *                 example: john@example.com
- *               phone:
- *                 type: string
- *                 example: 9876543210
- *               serviceType:
- *                 type: string
- *                 example: Haircut
- *               selectedWindow:
- *                 type: string
- *                 enum: [Mon-Wed, Thu-Fri, Sat-Sun]
- *                 example: Mon-Wed
- *               duration:
- *                 type: number
- *                 example: 20
- *               price:
- *                 type: number
- *                 example: 500
- *     responses:
- *       201:
- *         description: Appointment created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Appointment'
- *       400:
- *         description: Selected slot not available
- *       500:
- *         description: Server error
- */
 
 /**
  * @swagger
@@ -139,44 +80,8 @@ const router = express.Router();
  *         description: Server error
  */
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Appointment:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *         name:
- *           type: string
- *         email:
- *           type: string
- *         phone:
- *           type: string
- *         serviceType:
- *           type: string
- *         selectedWindow:
- *           type: string
- *           enum: [Mon-Wed, Thu-Fri, Sat-Sun]
- *         duration:
- *           type: number
- *         price:
- *           type: number
- *         status:
- *           type: string
- *           enum: [pending, confirmed]
- *         paymentStatus:
- *           type: string
- *           enum: [pending, completed, failed, refunded]
- *         createdAt:
- *           type: string
- *         updatedAt:
- *           type: string
- */
 
-
-router.post('/create-appointment', validateAppointment, createAppointment)
+// router.post('/create-appointment', validateAppointment, createAppointment)
 
 router.get("/all-appointment", auth, getAppointments)
 

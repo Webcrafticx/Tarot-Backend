@@ -2,46 +2,7 @@ const Appointment = require('../models/appointment');
 const Availability = require('../models/availabilty');
 const { sendConfirmationEmail } = require('../services/emailService');
 
-exports.createAppointment = async (req, res) => {
-  try {
-    const { name, email, phone, serviceType, selectedWindow, duration, price } = req.body;
 
-    if (selectedWindow) {
-      const availability = await Availability.findOne({ windowName: selectedWindow, isAvailable: true });
-      if (!availability) {
-        return res.status(400).json({
-          success: false,
-          message: 'Selected Slot is not available'
-        });
-      }
-    }
-
-    const appointment = await Appointment.create({
-      name,
-      email,
-      phone,
-      serviceType,
-      selectedWindow: selectedWindow || null,
-      duration: duration || 20,
-      price: price || 0
-    });
-
-    // await sendConfirmationEmail(appointment);
-
-    res.status(201).json({
-      success: true,
-      message: 'Appointment created successfully',
-      data: appointment
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message
-    });
-  }
-};
 
 exports.getAppointments = async (req, res) => {
   try {

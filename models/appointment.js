@@ -1,3 +1,4 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
@@ -21,6 +22,12 @@ const appointmentSchema = new mongoose.Schema({
   price: {
     type: Number,
     default: 0
+  },
+  location:{
+    type: String,
+    required: true,
+    trim: true
+    
   },
   serviceType: {
     type: String,
