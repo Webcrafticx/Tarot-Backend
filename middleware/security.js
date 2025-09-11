@@ -14,7 +14,7 @@ const securityMiddleware = (app) => {
 // }))
 
     app.use(cors({
-        origin: process.env.CLIENT_URL || 'http://localhost:3000',
+        origin: process.env.CLIENT_URL || 'http://localhost:3000' || 'https://tarot-frontend-seven.vercel.app/',
         credentials: true,
     }))
 }
