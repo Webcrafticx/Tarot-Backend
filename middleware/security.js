@@ -22,6 +22,7 @@ const securityMiddleware = (app) => {
     process.env.CLIENT_URL,                     // from .env
     'http://localhost:3000',                    // local dev
     'https://tarot-frontend-seven.vercel.app',  // production frontend
+    'https://www.raveenatarotstarr.com',        // custom domain
   ].filter(Boolean); // remove undefined/null
 
   app.use(
