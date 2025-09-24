@@ -74,6 +74,7 @@ const verifyPaymentAndCreateAppointment = async (req, res) => {
       phone: appointmentData.phone,
       serviceType: appointmentData.serviceType,
       selectedWindow: appointmentData.selectedWindow || null,
+      selectedWindowDates: appointmentData.selectedWindowDates,  
       duration: appointmentData.duration || 20,
       location: appointmentData.location,
       price: appointmentData.price || 0,
