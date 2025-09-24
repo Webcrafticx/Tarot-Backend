@@ -28,6 +28,12 @@ const appointmentSchema = new mongoose.Schema({
     trim: true
     
   },
+selectedWindowDates: {
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  displayDate: { type: String, required: true } // e.g. "Mon 22 - Wed, 24 Sept"
+},
+
   serviceType: {
     type: String,
     required: true,

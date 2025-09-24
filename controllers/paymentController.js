@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const razorpay = require("../utils/razorpay");
 const createPaymentOrder = async (req, res) => {
   try {
-    const { name, email, phone, serviceType, selectedWindow, duration, price, location } = req.body;
+    const { name, email, phone, serviceType, selectedWindow, duration, price, location, selectedWindowDates } = req.body;
 
     // Validate slot availability
     if (selectedWindow) {
@@ -31,7 +31,7 @@ const createPaymentOrder = async (req, res) => {
       message: 'Payment order created',
       data: {
         order,
-        appointmentData: { name, email, phone, serviceType, selectedWindow, duration, price, location }
+        appointmentData: { name, email, phone, serviceType, selectedWindow, duration, price, location, selectedWindowDates }
       }
     });
   } catch (error) {
