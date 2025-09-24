@@ -1,7 +1,8 @@
 const Appointment = require('../models/appointment');
 const Availability = require('../models/availabilty');
 const { sendConfirmationEmail } = require('../services/emailService');
-
+const crypto = require("crypto");
+const razorpay = require("../utils/razorpay");
 const createPaymentOrder = async (req, res) => {
   try {
     const { name, email, phone, serviceType, selectedWindow, duration, price, location } = req.body;
@@ -17,13 +18,13 @@ const createPaymentOrder = async (req, res) => {
       }
     }
 
-    const order = {
-      id: `order_${Date.now()}`,
+    const options = {
       amount: (price || 0) * 100,
-      currency: 'INR',
-      receipt: `temp_${Date.now()}`,
-      status: 'created'
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`
     };
+
+    const order = await razorpay.orders.create(options);
 
     res.json({
       success: true,
@@ -38,10 +39,24 @@ const createPaymentOrder = async (req, res) => {
   }
 };
 
+
+
 const verifyPaymentAndCreateAppointment = async (req, res) => {
   try {
-    const { paymentId, orderId, appointmentData } = req.body;
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, appointmentData } = req.body;
 
+    // Verify signature
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: "Invalid payment signature" });
+    }
+
+    // Check slot availability again before confirming
     if (appointmentData.selectedWindow) {
       const availability = await Availability.findOne({ windowName: appointmentData.selectedWindow, isAvailable: true });
       if (!availability) {
@@ -52,6 +67,7 @@ const verifyPaymentAndCreateAppointment = async (req, res) => {
       }
     }
 
+    // Create appointment
     const appointment = await Appointment.create({
       name: appointmentData.name,
       email: appointmentData.email,
@@ -63,8 +79,8 @@ const verifyPaymentAndCreateAppointment = async (req, res) => {
       price: appointmentData.price || 0,
       status: 'confirmed',
       paymentStatus: 'completed',
-      razorpayPaymentId: paymentId || null,
-      razorpayOrderId: orderId || null
+      razorpayPaymentId: razorpay_payment_id,
+      razorpayOrderId: razorpay_order_id
     });
 
     await sendConfirmationEmail(appointment);
@@ -78,6 +94,7 @@ const verifyPaymentAndCreateAppointment = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error verifying payment', error: error.message });
   }
 };
+
 
 
 
