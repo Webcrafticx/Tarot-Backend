@@ -1,6 +1,5 @@
 const Appointment = require('../models/appointment');
 const Availability = require('../models/availabilty');
-const { sendConfirmationEmail } = require('../services/emailService');
 
 
 
@@ -11,19 +10,18 @@ exports.getAppointments = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const query = {};
-    if (req.query.status) {
-      query.status = req.query.status;
-    }
-    if (req.query.selectedWindow) {
-      query.selectedWindow = req.query.selectedWindow;
-    }
+    if (req.query.status) query.status = req.query.status;
+    if (req.query.selectedWindow) query.selectedWindow = req.query.selectedWindow;
 
-    const appointments = await Appointment.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    const [appointments, totalAppointments] = await Promise.all([
+      Appointment.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(), // 🚀 faster
+      Appointment.countDocuments(query)
+    ]);
 
-    const totalAppointments = await Appointment.countDocuments(query);
     const totalPages = Math.ceil(totalAppointments / limit);
 
     res.status(200).json({
@@ -47,3 +45,4 @@ exports.getAppointments = async (req, res) => {
     });
   }
 };
+

@@ -1,13 +1,44 @@
 const Availability = require('../models/availabilty');
 
 
+let availabilityCache = {};
+
+const loadAvailabilityCache = async () => {
+  const windows = await Availability.find().lean();
+  availabilityCache = windows.reduce((acc, w) => {
+    acc[w.windowName] = w.isAvailable;
+    return acc;
+  }, {});
+};
+
+// const getAvailability = async (req, res) => {
+//   try {
+//     const windows = await Availability.find().sort({ windowName: 1 }).lean();
+//     res.json({
+//       success: true,
+//       data: windows
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error fetching availability windows',
+//       error: error.message
+//     });
+//   }
+// };
+
 const getAvailability = async (req, res) => {
   try {
-    const windows = await Availability.find().sort({ windowName: 1 }).lean();
-    res.json({
-      success: true,
-      data: windows
-    });
+    if (Object.keys(availabilityCache).length === 0) {
+      await loadAvailabilityCache();
+    }
+
+    const data = Object.keys(availabilityCache).map(windowName => ({
+      windowName,
+      isAvailable: availabilityCache[windowName]
+    }));
+
+    res.json({ success: true, data });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -16,7 +47,6 @@ const getAvailability = async (req, res) => {
     });
   }
 };
-
 
 const setAvailability = async (req, res) => {
   try {
@@ -29,23 +59,22 @@ const setAvailability = async (req, res) => {
       });
     }
 
-    let availability = await Availability.findOne({ windowName });
+    const finalStatus = typeof isAvailable === 'boolean' ? isAvailable : true;
 
-    if (availability) {
-      availability.isAvailable = typeof isAvailable === 'boolean' ? isAvailable : availability.isAvailable;
-    } else {
-      availability = new Availability({
-        windowName,
-        isAvailable: typeof isAvailable === 'boolean' ? isAvailable : true
-      });
-    }
+    // Update cache instantly
+    availabilityCache[windowName] = finalStatus;
 
-    await availability.save();
+    // Update DB (async but awaited here to keep consistency)
+    await Availability.updateOne(
+      { windowName },
+      { $set: { isAvailable: finalStatus } },
+      { upsert: true }
+    );
 
     res.json({
       success: true,
       message: 'Availability window updated successfully',
-      data: availability
+      data: { windowName, isAvailable: finalStatus }
     });
   } catch (error) {
     res.status(500).json({
@@ -67,6 +96,7 @@ const deleteAvailability = async (req, res) => {
         message: 'Availability window not found'
       });
     }
+    delete availabilityCache[availability.windowName];
 
     res.json({
       success: true,
@@ -84,5 +114,6 @@ const deleteAvailability = async (req, res) => {
 module.exports = {
   getAvailability,
   setAvailability,
-  deleteAvailability
+  deleteAvailability,
+  loadAvailabilityCache 
 };

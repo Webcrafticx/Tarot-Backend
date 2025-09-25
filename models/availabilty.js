@@ -12,7 +12,6 @@ const availabilitySchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-availabilitySchema.index({ windowName: 1 });
-
+availabilitySchema.index({ windowName: 1 }, { unique: true });
 
 module.exports = mongoose.model('Availability', availabilitySchema);

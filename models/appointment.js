@@ -64,11 +64,11 @@ selectedWindowDates: {
 
 appointmentSchema.index({ email: 1 });        
 appointmentSchema.index({ phone: 1 });        
-appointmentSchema.index({ status: 1 });       
-appointmentSchema.index({ createdAt: -1 });   
 appointmentSchema.index(
   { email: 1, serviceType: 1, selectedWindow: 1 },
   { unique: false }
 );
+appointmentSchema.index({ status: 1, createdAt: -1 });
+appointmentSchema.index({ selectedWindow: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

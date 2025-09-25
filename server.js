@@ -9,6 +9,7 @@ const availabilityRoutes = require('./routes/availabilty')
 const paymentRoutes = require('./routes/payment')
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const { loadAdminCache } = require('./controllers/authController')
 
 
 
@@ -17,7 +18,7 @@ connectDb()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 securityMiddleware(app)
-
+loadAdminCache()
 app.use('/api/auth', authRoutes)
 app.use('/api/appointment', appointmentRoutes)
 app.use('/api/availability', availabilityRoutes)
