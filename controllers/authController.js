@@ -8,6 +8,7 @@ exports.loadAdminCache = async () => {
   admins.forEach(admin => {
     adminCache.set(admin.email, admin);
   });
+    console.log('Admin cache loaded:', adminCache);
 };
 
 exports.register = async (req, res) => {
@@ -49,6 +50,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     let admin = adminCache.get(email);
+    console.log('Admin fetched from cache:', adminCache);
 
     if (!admin) {
       return res.status(400).json({
