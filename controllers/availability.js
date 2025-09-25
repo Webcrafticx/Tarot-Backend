@@ -5,10 +5,14 @@ let availabilityCache = {};
 
 const loadAvailabilityCache = async () => {
   const windows = await Availability.find().lean();
-  availabilityCache = windows.reduce((acc, w) => {
-    acc[w.windowName] = w.isAvailable;
-    return acc;
-  }, {});
+  Object.keys(availabilityCache).forEach(key => delete availabilityCache[key]);
+
+  // Populate
+  windows.forEach(w => {
+    availabilityCache[w.windowName] = w.isAvailable;
+  });
+    console.log('Availability cache loaded:', availabilityCache);
+
 };
 
 // const getAvailability = async (req, res) => {
@@ -115,5 +119,6 @@ module.exports = {
   getAvailability,
   setAvailability,
   deleteAvailability,
-  loadAvailabilityCache 
+  loadAvailabilityCache,
+  availabilityCache
 };

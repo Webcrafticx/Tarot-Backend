@@ -7,7 +7,7 @@ const connectDb = async () => {
     try{
         const conn = await mongoose.connect(process.env.MONGODB_URI,{
         })
-        loadAvailabilityCache()
+        await loadAvailabilityCache()
         console.log("Database connected successfully!".blue.bold)
 
     } catch(error){

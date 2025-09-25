@@ -4,14 +4,13 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
-  secure: parseInt(process.env.EMAIL_PORT, 10) === 465, // true for port 465
+  secure: parseInt(process.env.EMAIL_PORT, 10) === 465, 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
 });
 
-// Send confirmation email
 const sendConfirmationEmail = async (appointment) => {
   try {
     const mailOptions = {
